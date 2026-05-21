@@ -6,9 +6,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A Claude Code **plugin** ([.claude-plugin/plugin.json](.claude-plugin/plugin.json) at the root) bundling five skills that define the **Grimoire workflow**: a disciplined Spec → Plan → Execute pipeline with a Quick fast-path, plus an Init step that establishes per-project context.
+A Claude Code **plugin** ([.claude-plugin/plugin.json](.claude-plugin/plugin.json) at the root) bundling six skills that define the **Grimoire workflow**: a disciplined Spec → Plan → Execute pipeline with a Quick fast-path, plus an Init step that establishes per-project context and an Update step that maintains the plugin itself.
 
-Each skill is a single `skills/<name>/SKILL.md` file with YAML frontmatter (`name`, `description`, `argument-hint`) and a prompt body: [skills/grimoire-init/SKILL.md](skills/grimoire-init/SKILL.md), [skills/grimoire-spec/SKILL.md](skills/grimoire-spec/SKILL.md), [skills/grimoire-plan/SKILL.md](skills/grimoire-plan/SKILL.md), [skills/grimoire-execute/SKILL.md](skills/grimoire-execute/SKILL.md), [skills/grimoire-quick/SKILL.md](skills/grimoire-quick/SKILL.md).
+Each skill is a single `skills/<name>/SKILL.md` file with YAML frontmatter (`name`, `description`, `argument-hint`) and a prompt body: [skills/grimoire-init/SKILL.md](skills/grimoire-init/SKILL.md), [skills/grimoire-spec/SKILL.md](skills/grimoire-spec/SKILL.md), [skills/grimoire-plan/SKILL.md](skills/grimoire-plan/SKILL.md), [skills/grimoire-execute/SKILL.md](skills/grimoire-execute/SKILL.md), [skills/grimoire-quick/SKILL.md](skills/grimoire-quick/SKILL.md), [skills/grimoire-update/SKILL.md](skills/grimoire-update/SKILL.md).
 
 The shared, load-bearing workflow rules — TDD, sub-agent spawning, commits, `.grimoire/` layout, project context, historic, pause points — live in a **single source of truth**: [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). Each SKILL.md references it via `${CLAUDE_PLUGIN_ROOT}/GRIMOIRE-CONVENTIONS.md` so the rules aren't duplicated across skill bodies.
 
@@ -25,6 +25,7 @@ Every feature, change, or alteration tracked by Grimoire is called a **page**. A
 - **`grimoire-plan`** — Takes a page number (`42` or `042`). Hard-stops if the page folder is missing, has no `SPEC.md`, or the HISTORIC entry is not in `[spec]` status. Reads `SPEC.md` and writes sequential step files (`1-[step].md`, …) into the existing folder. Updates the HISTORIC entry from `[spec]` to `[planned]` in place. Never bootstraps, appends, or rotates `HISTORIC.md`.
 - **`grimoire-execute`** — Takes a page number. Hard-stops if the page folder is missing, has no step files, or the HISTORIC entry is not in `[planned]` status. Executes step files in strict numeric order and **spawns one sub-agent per step file** to preserve context lucidity. On success, updates the page's `HISTORIC.md` entry from `[planned]` to `[finished]` in place — **no files are moved**.
 - **`grimoire-quick`** — Fast-path for small fixes. Has a **scope gatekeeper**: if the task is too large, it must STOP and tell the user to switch to `grimoire-spec` (the entry point of the long-form pipeline). Requires explicit user authorization of the inline plan before any code is written. Stays fully ephemeral: no page folder, no `HISTORIC.md` entry.
+- **`grimoire-update`** — Plugin self-maintenance. Reads the installed version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`, `WebFetch`es the latest `plugin.json` and `CHANGELOG.md` from the GitHub `main` branch, and — only if versions differ — shows the changelog diff and guides the user through `/plugin marketplace update grimoire` followed by `/reload-plugins`. Does **not** write to `.grimoire/`, does **not** create a page, does **not** make commits in the consumer project. Pure orchestration of two slash commands the user runs themselves.
 
 ## Shared conventions
 
