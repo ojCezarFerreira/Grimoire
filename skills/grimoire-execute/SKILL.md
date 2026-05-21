@@ -1,11 +1,11 @@
 ---
-name: sage-execute
-description: Run a plan file with Sage.
+name: grimoire-execute
+description: Run a plan file with Grimoire.
 argument-hint: @caminho-para-o-plano
 ---
 
 **[Required Reading]**
-Before proceeding, read `${CLAUDE_PLUGIN_ROOT}/SAGE-CONVENTIONS.md`. Its rules (§ TDD, § Sub-agent spawning, § Commits, § .planning/ layout) are load-bearing for this skill.
+Before proceeding, read `${CLAUDE_PLUGIN_ROOT}/GRIMOIRE-CONVENTIONS.md`. Its rules (§ TDD, § Sub-agent spawning, § Commits, § .grimoire/ layout) are load-bearing for this skill.
 
 **[Objective]**
 Execute the development plan(s) located at: $1
@@ -24,7 +24,7 @@ Execute the development plan(s) located at: $1
 - Make commits per `§ Commits`.
 
 **[Phase 4: Cleanup & Finalization]**
-- Once all execution is verified and successful, move the plan to `.planning/finished/` per `§ .planning/ layout`:
-  - **Single file:** move the `.md` file to `.planning/finished/`.
-  - **Directory:** move the ENTIRE parent folder (containing all sub-plans) into `.planning/finished/`, preserving its internal structure.
+- Once all execution is verified and successful, move the plan to `.grimoire/finished/` per `§ .grimoire/ layout`:
+  - **Single file:** move the `.md` file to `.grimoire/finished/`.
+  - **Directory:** move the ENTIRE parent folder (containing all sub-plans) into `.grimoire/finished/`, preserving its internal structure.
 - Create a final commit for this organizational change: `chore: move [plan-name] to finished`.
