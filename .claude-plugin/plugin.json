@@ -8,5 +8,8 @@
     "name": "Cezar Ferreira",
     "email": "cezarleferr@gmail.com"
   },
+  "homepage": "https://github.com/ojCezarFerreira/grimoire",
+  "repository": "https://github.com/ojCezarFerreira/grimoire",
+  "license": "MIT",
   "keywords": ["workflow", "tdd", "planning", "sub-agents"]
 }

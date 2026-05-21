@@ -17,11 +17,11 @@ All five skills share a single source of truth for the workflow rules — strict
 Add this repo as a marketplace, then install the plugin:
 
 ```
-/plugin marketplace add <github-owner>/grimoire
-/plugin install grimoire
+/plugin marketplace add ojCezarFerreira/grimoire
+/plugin install grimoire@grimoire
 ```
 
-Replace `<github-owner>/grimoire` with the repo path (for example `cezarleferr/grimoire`). Other install options:
+The `grimoire@grimoire` form is `plugin-name@marketplace-name` (both happen to be `grimoire` here). Other install options:
 
 ```
 # Install to project scope (shared via .claude/settings.json)

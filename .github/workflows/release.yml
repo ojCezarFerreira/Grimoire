@@ -1,0 +1,58 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract tag version
+        id: tag
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate plugin.json version matches tag
+        run: |
+          PLUGIN_VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
+          if [ "$PLUGIN_VERSION" != "${{ steps.tag.outputs.version }}" ]; then
+            echo "::error::plugin.json version ($PLUGIN_VERSION) does not match tag (${{ steps.tag.outputs.version }})"
+            exit 1
+          fi
+
+      - name: Validate marketplace.json version matches tag
+        run: |
+          MP_VERSION=$(jq -r '.plugins[0].version' .claude-plugin/marketplace.json)
+          if [ "$MP_VERSION" != "${{ steps.tag.outputs.version }}" ]; then
+            echo "::error::marketplace.json plugins[0].version ($MP_VERSION) does not match tag (${{ steps.tag.outputs.version }})"
+            exit 1
+          fi
+
+      - name: Extract release notes from CHANGELOG
+        run: |
+          VERSION="${{ steps.tag.outputs.version }}"
+          awk -v ver="$VERSION" '
+            $0 ~ "^## \\[" ver "\\]" { flag=1; next }
+            flag && /^## \[/ { exit }
+            flag { print }
+          ' CHANGELOG.md > release-notes.md
+          if [ ! -s release-notes.md ]; then
+            echo "::error::No CHANGELOG entry found for version $VERSION"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ github.ref_name }}" \
+            --title "Grimoire ${{ github.ref_name }}" \
+            --notes-file release-notes.md
