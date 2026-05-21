@@ -7,7 +7,7 @@ A Claude Code plugin bundling four skills for a disciplined **Plan → Execute**
 - `/grimoire-execute <path>` — execute a plan (single file or sub-plan directory) via sub-agents, one per sub-plan in strict numeric order. On success, moves the plan(s) into `.grimoire/finished/`.
 - `/grimoire-quick <fix>` — fast-path for small fixes. Has a scope gatekeeper (stops and redirects you to `/grimoire-plan` if the task is too big) and requires explicit authorization of the inline plan before any code is written.
 
-All four skills share a single source of truth for the workflow rules — strict TDD, atomic Conventional Commits, sub-agent orchestration, the `.grimoire/` directory layout, and project context loading — in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md).
+All four skills share a single source of truth for the workflow rules — strict TDD, atomic Conventional Commits, sub-agent orchestration, the `.grimoire/` directory layout, project context loading, and the `HISTORIC.md` recency log — in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md).
 
 ## Install
 
@@ -34,7 +34,7 @@ After install, the four skills are available as `/grimoire-init`, `/grimoire-pla
 
 1. `/grimoire-init` (once per project) → produces `.grimoire/PROJECT.md` from a short interview; every subsequent skill loads it automatically. Re-run it later in update mode whenever the project's purpose, stack, or constraints have shifted.
 2. `/grimoire-plan "add user-auth endpoint"` → produces `.grimoire/001-add-user-auth-endpoint.md` (or a `.grimoire/001-add-user-auth-endpoint/` folder of sub-plans).
-3. `/grimoire-execute .grimoire/001-add-user-auth-endpoint.md` → runs the plan via a sub-agent under strict TDD, commits atomically, then moves the plan to `.grimoire/finished/`.
+3. `/grimoire-execute .grimoire/001-add-user-auth-endpoint.md` → runs the plan via a sub-agent under strict TDD, commits atomically, then moves the plan to `.grimoire/finished/` and appends a short summary to `.grimoire/HISTORIC.md` (the recency log; older snapshots rotate into `.grimoire/bag/historic/`).
 4. Use `/grimoire-quick "fix typo in login error message"` for trivial fixes — Grimoire will stop you and route you back to `/grimoire-plan` if the request is too large.
 
 ## Editing the plugin

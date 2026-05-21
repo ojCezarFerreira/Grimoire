@@ -10,7 +10,7 @@ A Claude Code **plugin** ([.claude-plugin/plugin.json](.claude-plugin/plugin.jso
 
 Each skill is a single `skills/<name>/SKILL.md` file with YAML frontmatter (`name`, `description`, `argument-hint`) and a prompt body: [skills/grimoire-init/SKILL.md](skills/grimoire-init/SKILL.md), [skills/grimoire-plan/SKILL.md](skills/grimoire-plan/SKILL.md), [skills/grimoire-execute/SKILL.md](skills/grimoire-execute/SKILL.md), [skills/grimoire-quick/SKILL.md](skills/grimoire-quick/SKILL.md).
 
-The shared, load-bearing workflow rules — TDD, sub-agent spawning, commits, `.grimoire/` layout, project context, pause points — live in a **single source of truth**: [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). Each SKILL.md references it via `${CLAUDE_PLUGIN_ROOT}/GRIMOIRE-CONVENTIONS.md` so the rules aren't duplicated across skill bodies.
+The shared, load-bearing workflow rules — TDD, sub-agent spawning, commits, `.grimoire/` layout, project context, historic, pause points — live in a **single source of truth**: [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). Each SKILL.md references it via `${CLAUDE_PLUGIN_ROOT}/GRIMOIRE-CONVENTIONS.md` so the rules aren't duplicated across skill bodies.
 
 There is no source code, no build system, no test suite — edits land in the prompt text of the markdown files above.
 
@@ -30,6 +30,7 @@ All shared, load-bearing rules live in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVEN
 - § Commits (atomic + Conventional Commits in English)
 - § `.grimoire/` layout (NNN naming, sub-plan folders, `.grimoire/finished/`, `.grimoire/PROJECT.md`)
 - § Project context (every skill loads `.grimoire/PROJECT.md` if present; missing → suggest `grimoire-init`; only `grimoire-init` writes it)
+- § Historic (`.grimoire/HISTORIC.md` keeps the last 5 executions; `grimoire-execute` appends + rotates to `.grimoire/bag/historic/HISTORIC-N.md`; bootstrap deferred to a future skill)
 - § Pause-point pattern (grimoire-init: clarifying questions + draft review; grimoire-plan: unclear requirements; grimoire-quick: scope gatekeeper + plan authorization)
 
 **Do not duplicate these rules in SKILL.md bodies.** When a rule changes, update `GRIMOIRE-CONVENTIONS.md` only.
