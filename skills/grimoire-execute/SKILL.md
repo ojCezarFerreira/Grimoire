@@ -5,8 +5,9 @@ argument-hint: @caminho-para-o-plano
 ---
 
 **[Required Reading]**
-1. Read `${CLAUDE_PLUGIN_ROOT}/GRIMOIRE-CONVENTIONS.md`. Its rules (§ TDD, § Sub-agent spawning, § Commits, § .grimoire/ layout, § Project context) are load-bearing for this skill.
+1. Read `${CLAUDE_PLUGIN_ROOT}/GRIMOIRE-CONVENTIONS.md`. Its rules (§ TDD, § Sub-agent spawning, § Commits, § .grimoire/ layout, § Project context, § Historic) are load-bearing for this skill.
 2. If `.grimoire/PROJECT.md` exists in the project root, read it for project context. If it does not exist, proceed without it and suggest the user run `grimoire-init` once this task is complete.
+3. If `.grimoire/HISTORIC.md` exists, read it for recent-execution context. If older context seems relevant, browse `.grimoire/bag/historic/` (newest suffix first). Missing → proceed without it.
 
 **[Objective]**
 Execute the development plan(s) located at: $1
@@ -29,3 +30,8 @@ Execute the development plan(s) located at: $1
   - **Single file:** move the `.md` file to `.grimoire/finished/`.
   - **Directory:** move the ENTIRE parent folder (containing all sub-plans) into `.grimoire/finished/`, preserving its internal structure.
 - Create a final commit for this organizational change: `chore: move [plan-name] to finished`.
+- Update the recent-execution log per `§ Historic`:
+  - If `.grimoire/HISTORIC.md` does not exist, skip this step silently (creation is reserved for a future skill).
+  - Otherwise, prepend a new entry to `HISTORIC.md` in the form `1. **<plan-name>** — <1–2 sentence description of what was delivered>`, renumbering existing entries.
+  - If `HISTORIC.md` already had 5 entries before this append, first rotate it to `.grimoire/bag/historic/HISTORIC-N.md` (creating the folder if needed; `N = max existing suffix + 1`, or `1` if empty), then write the new `HISTORIC.md` containing only the new entry.
+- Commit the historic update per `§ Commits` (may be bundled with the `chore: move ... to finished` commit, or kept separate as `chore: update historic log` if cohesion is clearer that way).
