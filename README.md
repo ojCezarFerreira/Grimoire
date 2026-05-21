@@ -1,28 +1,41 @@
+<div align="center">
+
+<img src="assets/Grimoire.png" alt="Grimoire" width="800">
+
 # Grimoire
 
-A Claude Code plugin bundling six skills for a disciplined **Spec → Plan → Execute** pipeline with a **Quick** fast-path, an **Init** step that gives every session shared project context, and an **Update** step that keeps the plugin itself current.
+**English** · [Português (Brasil)](README.pt-BR.md)
 
-Every change tracked by Grimoire is called a **page**: a folder under `.grimoire/pages/` containing a `SPEC.md` and one or more sequential step files, plus a single entry in `.grimoire/HISTORIC.md` that records its status (`[spec]` → `[planned]` → `[finished]`).
+A Claude Code plugin bundling six skills for a disciplined **Spec → Plan → Execute** pipeline, with a **Quick** fast-path, an **Init** step that gives every session shared project context, and an **Update** step that keeps the plugin itself current.
 
-- `/grimoire-init` — analyze the project and interview you to produce `.grimoire/PROJECT.md` (purpose, audience, tech stack, conventions). Every other Grimoire skill loads that file on startup so the orchestrator and its sub-agents share baseline context. Re-running enters update mode and asks only about deltas.
-- `/grimoire-spec <request>` — analyze the codebase, ask clarifying questions until consensus, then write the page as `.grimoire/pages/NNN-[page-name]/SPEC.md`. Bootstraps/appends/rotates `.grimoire/HISTORIC.md`, registering the page with status `[spec]`. This is the only skill that creates a new page.
-- `/grimoire-plan <NNN>` — read the page's `SPEC.md` and write sequential step files (`1-[step].md`, `2-[step].md`, …) into the existing page folder. Updates the page's `HISTORIC.md` entry from `[spec]` to `[planned]`. Hard-stops if the page does not exist, has no `SPEC.md`, or is not in `[spec]` status.
-- `/grimoire-execute <NNN>` — execute the page's step files via sub-agents, one per step file in strict numeric order. On success, updates the page's `HISTORIC.md` entry to `[finished]` in place — no files are moved. Hard-stops if the page is not in `[planned]` status or has no step files.
-- `/grimoire-quick <fix>` — fast-path for small fixes. Has a scope gatekeeper (stops and redirects you to `/grimoire-spec` if the task is too big) and requires explicit authorization of the inline plan before any code is written. Stays ephemeral: no page folder, no `HISTORIC.md` entry.
-- `/grimoire-update` — keep the plugin itself up to date. Reads the installed version, fetches the latest from GitHub, shows you exactly what changed in the changelog between the two, and only then guides you through the two official Claude Code commands (`/plugin marketplace update grimoire` + `/reload-plugins`). Exits silently if you're already on the latest version. Writes nothing to your project.
+</div>
 
-The pipeline skills (`init`, `spec`, `plan`, `execute`, `quick`) share a single source of truth for the workflow rules — strict TDD, atomic Conventional Commits, sub-agent orchestration, the `.grimoire/pages/` layout, project context loading, and the `HISTORIC.md` recency log and status-of-record — in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). `grimoire-update` is plugin self-maintenance and does not participate in those rules.
+> [!WARNING]
+> **Early development.** Grimoire is brand-new — it works for the author's day-to-day Claude Code sessions but has not been battle-tested across many projects or teams. Expect rough edges, breaking changes between minor versions, and gaps in error messages. Issues and PRs are very welcome.
+
+## Why Grimoire
+
+Grimoire is a small bundle of Claude Code skills I built because I kept getting mediocre output from other context orchestrators — they were too heavy, too chatty, and too eager to take decisions away from me. The result was usually a project that drifted from what I actually wanted.
+
+Grimoire is the opposite: a disciplined pipeline that asks until **you** are clear on what you want, then ships exactly that. It will help you think through a fuzzy idea, but it will not pretend to know your project better than you do, and it will not silently choose for you.
+
+**It is not for non-technical users.** It assumes you can read code, evaluate a plan, and own the decisions it surfaces. If that's you, Grimoire stays out of your way and gets the page done.
+
+> Every change Grimoire tracks is called a **page**: a folder under `.grimoire/pages/` containing a `SPEC.md` and one or more sequential step files, plus a single entry in `.grimoire/HISTORIC.md` that records its status (`[spec]` → `[planned]` → `[finished]`).
 
 ## Install
-
-Add this repo as a marketplace, then install the plugin:
 
 ```
 /plugin marketplace add ojCezarFerreira/grimoire
 /plugin install grimoire@grimoire
 ```
 
-The `grimoire@grimoire` form is `plugin-name@marketplace-name` (both happen to be `grimoire` here). Other install options:
+That's it — `/grimoire-init`, `/grimoire-spec`, `/grimoire-plan`, `/grimoire-execute`, `/grimoire-quick`, and `/grimoire-update` are now available in every Claude Code session.
+
+To pull a newer version later, just run `/grimoire-update` — it handles the version check, changelog diff, and the two official commands for you.
+
+<details>
+<summary>Other install options</summary>
 
 ```
 # Install to project scope (shared via .claude/settings.json)
@@ -32,19 +45,103 @@ claude plugin install grimoire --scope project
 claude --plugin-dir /path/to/this/repo
 ```
 
-After install, the six skills are available as `/grimoire-init`, `/grimoire-spec`, `/grimoire-plan`, `/grimoire-execute`, `/grimoire-quick`, `/grimoire-update` in any session.
+The `grimoire@grimoire` form in the main install command is `plugin-name@marketplace-name` (both happen to be `grimoire` here).
 
-To pull a newer version later, just run `/grimoire-update` — it handles the version check, changelog diff, and the two official commands for you.
+</details>
 
-## Workflow
+## Skills
 
-1. `/grimoire-init` (once per project) → produces `.grimoire/PROJECT.md` from a short interview; every subsequent skill loads it automatically. Re-run it later in update mode whenever the project's purpose, stack, or constraints have shifted.
-2. `/grimoire-spec "add user-auth endpoint"` → after a clarifying interview, produces `.grimoire/pages/001-add-user-auth-endpoint/SPEC.md` and registers the page in `.grimoire/HISTORIC.md` as `1. **001-add-user-auth-endpoint** [spec] — …` (rotating to `.grimoire/bag/historic/` if the log was already full).
-3. `/grimoire-plan 1` → reads `SPEC.md`, plans the implementation, and writes sequential step files (e.g., `1-schema.md`, `2-endpoints.md`, `3-tests.md`) into the same page folder. Updates the entry to `[planned]` in place.
-4. `/grimoire-execute 1` → runs each step file via a sub-agent under strict TDD, commits atomically, then updates the page's `HISTORIC.md` entry in place to `[finished]`. The page folder stays in `.grimoire/pages/`.
-5. Use `/grimoire-quick "fix typo in login error message"` for trivial fixes — Grimoire will stop you and route you back to `/grimoire-spec` if the request is too large.
+| Skill | What it does | Details |
+|-------|--------------|---------|
+| `/grimoire-init` | Interview the project once and write `.grimoire/PROJECT.md` so every later skill starts with shared context. | [↓](#grimoire-init) |
+| `/grimoire-spec <request>` | Clarify a feature/fix and write `SPEC.md` for a new page; registers it in `HISTORIC.md` as `[spec]`. | [↓](#grimoire-spec) |
+| `/grimoire-plan <NNN>` | Decompose `SPEC.md` into sequential step files; flips the page to `[planned]`. | [↓](#grimoire-plan) |
+| `/grimoire-execute <NNN>` | Run each step file in its own sub-agent under strict TDD; flips the page to `[finished]`. | [↓](#grimoire-execute) |
+| `/grimoire-quick <fix>` | Fast-path for trivial fixes. Refuses and redirects to `/grimoire-spec` if scope is too big. | [↓](#grimoire-quick) |
+| `/grimoire-update` | Check installed vs. latest version, show changelog, guide you through the official update commands. | [↓](#grimoire-update) |
 
-The page folder ends up looking like this:
+## Skills in detail
+
+### /grimoire-init
+
+Run this once per project (and any time the project's purpose, stack, or constraints shift meaningfully). It scans your repo for signals — manifests, build configs, CI definitions, top-level layout — and then asks targeted questions about anything it cannot infer: the project's purpose, the audience, the current stage, non-obvious conventions.
+
+After draft review and your approval, it writes `.grimoire/PROJECT.md` with sections for **Purpose**, **Audience**, **Tech Stack**, **Repository Layout**, **Key Conventions / Constraints**, **Current Status**, and **Notes**. From then on, every other Grimoire skill loads `PROJECT.md` automatically so the orchestrator and its sub-agents share baseline context.
+
+Re-running enters **update mode** — it preserves what is still accurate and asks only about deltas. It never writes to `HISTORIC.md`; that is owned by `grimoire-spec`.
+
+### /grimoire-spec
+
+The only entry point of the long-form pipeline. You hand it a request in free text (`/grimoire-spec "add user-auth endpoint"`); it analyzes the relevant slice of the codebase, asks clarifying questions until consensus on **goals**, **non-goals**, **scope**, **acceptance criteria**, **constraints**, and **open questions**, and then — after draft review — writes `.grimoire/pages/NNN-[page-name]/SPEC.md`.
+
+The page number `NNN` is auto-assigned as `max(existing) + 1`, zero-padded. The page name is short kebab-case (2–5 words) chosen to read meaningfully on its own.
+
+`grimoire-spec` is the only skill that creates a new page folder and the only writer of `HISTORIC.md` beyond an in-place status flip — it bootstraps the file if missing, prepends the new entry as item `1` with status `[spec]`, and rotates the file to `.grimoire/bag/historic/HISTORIC-N.md` once it reaches five entries.
+
+### /grimoire-plan
+
+Takes a page number (`1` or `001`). Hard-stops with a clear message if the page does not exist, has no `SPEC.md`, or is not in `[spec]` status — it never silently fixes the state or runs another skill for you.
+
+When preconditions pass, it reads `SPEC.md` in full, evaluates complexity, and writes sequential step files (`1-[step].md`, `2-[step].md`, …) inside the existing page folder. The plan owner decides how many step files to emit: simple pages get a single step file; larger pages get more to preserve context lucidity during execution. Finally, it updates the page's `HISTORIC.md` entry from `[spec]` to `[planned]` in place — no append, no rotate.
+
+### /grimoire-execute
+
+Takes a page number. Hard-stops if the page is missing, has no step files, or is not in `[planned]` status.
+
+When preconditions pass, it spawns **one sub-agent per step file** in strict numeric order — step `N+1` never starts until step `N` has fully completed. Each sub-agent runs its step file under strict TDD (Red/Green/Refactor) and makes atomic Conventional Commits as it goes. On success, the page's `HISTORIC.md` entry is updated from `[planned]` to `[finished]` in place; no files are moved.
+
+### /grimoire-quick
+
+Fast-path for trivial fixes (typos, one-line bug fixes, small tweaks). Two pause points protect you from misuse:
+
+- **Scope gatekeeper.** If `grimoire-quick` judges the request too large or risky, it STOPS and tells you to run `/grimoire-spec` instead. It will not "just try" a large change.
+- **Plan authorization.** Even on small tasks, it prints an inline plan and waits for your explicit go-ahead before any code is written.
+
+Quick stays fully ephemeral — no page folder, no `HISTORIC.md` entry, no rotation. The fix lands as one or more atomic Conventional Commits and that is it.
+
+### /grimoire-update
+
+Plugin self-maintenance. Reads the installed version from `${CLAUDE_PLUGIN_ROOT}/.claude-plugin/plugin.json`, fetches the latest `plugin.json` and `CHANGELOG.md` from GitHub, and — only if the versions differ — shows you the changelog diff between the two and asks for confirmation. On `yes`, it walks you through the two official Claude Code commands (`/plugin marketplace update grimoire`, then `/reload-plugins`) and waits for you to run each before continuing.
+
+If you are already on the latest version, it exits silently. It writes nothing to your project and never spawns sub-agents — it is pure orchestration of two slash commands you run yourself.
+
+## How it works
+
+The five pipeline skills (`init`, `spec`, `plan`, `execute`, `quick`) compose into a single flow. `init` runs once per project; `spec → plan → execute` is the long-form path for everything that deserves a page; `quick` is the escape hatch for trivial work that does not.
+
+```mermaid
+flowchart TD
+    Init([/grimoire-init]):::ctx
+    Spec([/grimoire-spec])
+    Plan([/grimoire-plan])
+    Exec([/grimoire-execute])
+    Quick([/grimoire-quick]):::fast
+    Done([done])
+
+    Init -. baseline context .-> Spec
+    Init -. baseline context .-> Quick
+    Spec -->|"page [spec]"| Plan
+    Plan -->|"page [planned]"| Exec
+    Exec -->|"page [finished]"| Done
+
+    Quick -->|trivial fix| Done
+    Quick -. too big .-> Spec
+
+    classDef ctx fill:#eef,stroke:#88a
+    classDef fast fill:#efe,stroke:#8a8
+```
+
+Every page in the long-form pipeline moves through three statuses recorded in `.grimoire/HISTORIC.md`. Skills hard-stop when invoked out of order — they never silently advance the state.
+
+```mermaid
+stateDiagram-v2
+    [*] --> spec : /grimoire-spec
+    spec --> planned : /grimoire-plan
+    planned --> finished : /grimoire-execute
+    finished --> [*]
+```
+
+A finished page folder ends up looking like this:
 
 ```
 .grimoire/pages/001-add-user-auth-endpoint/
@@ -56,6 +153,18 @@ The page folder ends up looking like this:
 
 Page numbers passed to `/grimoire-plan` and `/grimoire-execute` accept either bare integers (`1`, `42`) or zero-padded form (`001`, `042`). If a skill is invoked out of order (plan before spec, execute before plan, or re-running a finished page), it hard-stops with a clear message naming the current state — it never silently fixes the state or runs another skill for you.
 
-## Editing the plugin
+## Conventions
 
-See [CLAUDE.md](CLAUDE.md) for maintainer notes.
+The pipeline skills (`init`, `spec`, `plan`, `execute`, `quick`) share a single source of truth for the workflow rules — strict TDD, atomic Conventional Commits, sub-agent orchestration, the `.grimoire/pages/` layout, project context loading, and the `HISTORIC.md` recency log and status-of-record — in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). `grimoire-update` is plugin self-maintenance and does not participate in those rules.
+
+When a rule changes, it changes there once.
+
+## Contributing
+
+Grimoire is young and opinionated, but every issue, PR, and bug report is genuinely welcome — especially edge cases, awkward error messages, and "this skill didn't do what I expected" stories. Open an issue or a PR; there is no contribution too small.
+
+For maintainer notes on editing the plugin itself, see [CLAUDE.md](CLAUDE.md).
+
+## License
+
+[MIT](LICENSE) © Cezar Ferreira.
