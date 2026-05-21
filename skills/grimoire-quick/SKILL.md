@@ -17,7 +17,7 @@ $ARGUMENTS
 **[Phase 1: Analysis & Scope Gatekeeper]**
 - Analyze the relevant codebase architecture for this specific request.
 - Evaluate the complexity and scope of the requested change.
-- **CRITICAL — SCOPE CHECK** (per `§ Pause-point pattern`, grimoire-quick: scope gatekeeper): if this request is too large, complex, or risks context degradation, you MUST STOP immediately. Do not generate a plan. Inform me with the following message: *"This task is too large for a quick execution. Please start a new session and use the standard Planning prompt."*
+- **CRITICAL — SCOPE CHECK** (per `§ Pause-point pattern`, grimoire-quick: scope gatekeeper): if this request is too large, complex, or risks context degradation, you MUST STOP immediately. Do not generate a plan. Inform me with the following message: *"This task is too large for a quick execution. Please start a new session and run `/grimoire-spec` to open a page in the long-form Spec → Plan → Execute pipeline."*
 
 **[Phase 2: Quick Planning & User Authorization]**
 - If the scope is confirmed as small and safe for quick execution, ask any clarifying questions if necessary.

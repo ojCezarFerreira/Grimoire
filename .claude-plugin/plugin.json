@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "grimoire",
   "displayName": "Grimoire",
-  "version": "0.2.0",
-  "description": "Disciplined Plan → Execute pipeline with a Quick fast-path. Pages live in .grimoire/pages/; status tracked in HISTORIC.md; strict TDD; atomic Conventional Commits; sub-agent orchestration.",
+  "version": "0.3.0",
+  "description": "Disciplined Spec → Plan → Execute pipeline with a Quick fast-path. Pages live in .grimoire/pages/; status tracked in HISTORIC.md across [spec]/[planned]/[finished]; strict TDD; atomic Conventional Commits; sub-agent orchestration.",
   "author": {
     "name": "Cezar Ferreira",
     "email": "cezarleferr@gmail.com"
