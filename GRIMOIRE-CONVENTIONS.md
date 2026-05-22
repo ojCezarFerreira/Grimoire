@@ -129,14 +129,41 @@ Newest entry is item `1.`; older entries are renumbered downward. Status is one 
 
 ---
 
+## § IDE-aware review
+
+When a skill must show the user a draft, plan, or other markdown content for review before proceeding (e.g., `PROJECT.md` draft, `SPEC.md` draft, `grimoire-quick` plan, `grimoire-update` changelog), prefer rendered markdown in the user's IDE over inline chat text. Inline chat text is hard to scan and has no markdown rendering; an open file in the IDE has both.
+
+**Detection.** Inspect the runtime context for signals that Claude Code is running inside a desktop IDE extension (VSCode native extension, JetBrains plugin, Cursor, etc.). The system context block usually announces this explicitly (e.g., a `# VSCode Extension Context` section, or wording like *"running inside a VSCode native extension environment"*). When in doubt, assume terminal-only and use the inline fallback — the inline path is always safe.
+
+**IDE-aware flow.**
+
+1. Write the reviewable content to disk so the IDE auto-surfaces it with markdown preview:
+   - `grimoire-init` → `.grimoire/PROJECT.md` (final destination).
+   - `grimoire-spec` → `.grimoire/pages/NNN-[page-name]/SPEC.md` (create the page folder first if needed; do **not** touch `HISTORIC.md` yet — that still belongs to Phase 6).
+   - `grimoire-quick` → `.grimoire/bag/drafts/quick-plan.md` (create the folder if needed; this is a throwaway draft, not a final artifact).
+   - `grimoire-update` → `.grimoire/bag/drafts/grimoire-update-changelog.md` (same — throwaway).
+2. Tell the user in one short line which file was opened and what answer you're waiting for. Example: `📄 Rascunho aberto em .grimoire/PROJECT.md — revise no editor e diga "ok" para seguir, ou liste mudanças.`
+3. PAUSE for the user's confirmation or edits — same semantics as the inline flow.
+4. On approval:
+   - `grimoire-init` / `grimoire-spec`: the file is already at the final path — proceed straight to the commit phase. **No additional Write step needed.**
+   - `grimoire-quick` / `grimoire-update`: delete the draft file from `.grimoire/bag/drafts/` and proceed.
+5. On requested edits: edit the file in place and re-pause.
+6. On abandonment: delete the file (including the init/spec destination, since it was never approved — leaving an uncommitted, unapproved file pollutes the repo).
+
+**Inline fallback (terminal-only).** When the IDE is not detected, paste the rendered draft inline in chat (legacy behavior). Pause semantics, approval gating, and downstream commit timing are identical to the IDE-aware flow.
+
+**Commit timing.** Files written for review remain uncommitted until the user approves. The existing commit phases in each skill run unchanged AFTER approval — there is no separate "draft commit" and no cleanup commit.
+
+---
+
 ## § Pause-point pattern
 
 Grimoire skills must pause and wait for the user at well-defined checkpoints. Never proceed past a pause silently.
 
 - **`grimoire-init` — clarifying questions:** after analyzing the codebase, ask the user only about facts that cannot be inferred from the code (purpose, audience, stage, non-obvious constraints). In update mode, ask only about deltas.
-- **`grimoire-init` — draft review:** after composing the proposed `PROJECT.md`, output it inline and PAUSE for the user's confirmation or edits before writing the file.
+- **`grimoire-init` — draft review:** after composing the proposed `PROJECT.md`, present it for review per `§ IDE-aware review` and PAUSE for the user's confirmation or edits before locking the file in as approved.
 - **`grimoire-spec` — clarifying questions:** after analyzing the codebase and the user's request, ask targeted questions about pain, ambiguities, scope, and critical architectural decisions. Answer the user's questions in turn. Iterate until a consensus on what the page must deliver is reached.
-- **`grimoire-spec` — draft review:** after composing the proposed `SPEC.md`, output it inline and PAUSE for the user's confirmation or edits before writing the file. Do not write or touch `HISTORIC.md` yet.
+- **`grimoire-spec` — draft review:** after composing the proposed `SPEC.md`, present it for review per `§ IDE-aware review` and PAUSE for the user's confirmation or edits before locking the file in as approved. Do not write or touch `HISTORIC.md` yet.
 - **`grimoire-plan` — precondition check (HARD STOP):** before doing anything else, resolve the page number to `.grimoire/pages/NNN-*/`. If the folder does not exist, if `SPEC.md` is missing, or if the entry's status in `HISTORIC.md` is not `[spec]`, STOP immediately with a clear message naming the current state and the skill the user should run instead. Never offer to run that skill automatically; never silently fix the state.
   - Page NNN does not exist → `❌ Page NNN não existe. Rode /grimoire-spec primeiro.`
   - `SPEC.md` missing → `❌ Page NNN não tem SPEC.md. Rode /grimoire-spec primeiro.`
@@ -151,4 +178,4 @@ Grimoire skills must pause and wait for the user at well-defined checkpoints. Ne
   - Status is `[finished]` → `❌ Page NNN já foi finalizada.`
   - Entry missing from `HISTORIC.md` (rotated) → proceed; this matches the existing "skip silently if rotated" rule in `§ Historic` because rotation can happen during long executions.
 - **`grimoire-quick` — scope gatekeeper:** if the request is too large/complex to fit a quick execution, STOP immediately and tell the user to switch to `grimoire-spec` (the entry point to the long-form Spec → Plan → Execute pipeline) instead of generating a plan.
-- **`grimoire-quick` — plan authorization:** after outputting the inline plan in chat, PAUSE and wait for the user's explicit authorization or corrections before spawning the sub-agent. Do not start coding yet.
+- **`grimoire-quick` — plan authorization:** after presenting the plan for review per `§ IDE-aware review`, PAUSE and wait for the user's explicit authorization or corrections before spawning the sub-agent. Do not start coding yet.
