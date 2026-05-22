@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] — 2026-05-22
+
+### Added
+- New pause-point in `GRIMOIRE-CONVENTIONS.md § Pause-point pattern`: **final clarity check** for both `grimoire-plan` and `grimoire-quick`. Before a plan is closed and presented to the user, the agent must self-review for hidden assumptions and surface them via the available question tooling (e.g. `AskUserQuestion`) instead of silently guessing. Skip allowed only when the plan is fully unambiguous.
+
+### Changed
+- `grimoire-plan` Phase 3: ends with the new final clarity check before Phase 4 writes step files.
+- `grimoire-quick` Phase 2: runs the new final clarity check before composing/presenting the plan draft, replacing the prior "ask any clarifying questions if necessary" wording with an explicit self-review + pause requirement.
+
 ## [0.4.2] — 2026-05-22
 
 ### Changed
@@ -40,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `grimoire-init` and `grimoire-quick` aligned with the Spec → Plan → Execute pipeline.
 - README and CLAUDE.md updated for the new pipeline.
 
+[0.5.0]: https://github.com/ojCezarFerreira/grimoire/releases/tag/v0.5.0
 [0.4.2]: https://github.com/ojCezarFerreira/grimoire/releases/tag/v0.4.2
 [0.4.1]: https://github.com/ojCezarFerreira/grimoire/releases/tag/v0.4.1
 [0.4.0]: https://github.com/ojCezarFerreira/grimoire/releases/tag/v0.4.0
