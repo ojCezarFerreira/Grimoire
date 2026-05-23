@@ -33,6 +33,7 @@ skills/
   grimoire-plan/SKILL.md
   grimoire-execute/SKILL.md
   grimoire-quick/SKILL.md
+  grimoire-know/SKILL.md
   grimoire-update/SKILL.md
 GRIMOIRE-CONVENTIONS.md  ← single source of truth for workflow rules
 CLAUDE.md                ← maintainer-only notes (NOT loaded for end users)

@@ -6,7 +6,7 @@
 
 **English** · [Português (Brasil)](README.pt-BR.md)
 
-A Claude Code plugin bundling six skills for a disciplined **Spec → Plan → Execute** pipeline, with a **Quick** fast-path, an **Init** step that gives every session shared project context, and an **Update** step that keeps the plugin itself current.
+A Claude Code plugin bundling seven skills for a disciplined **Spec → Plan → Execute** pipeline, with a **Quick** fast-path, an **Init** step that gives every session shared project context, and an **Update** step that keeps the plugin itself current.
 
 </div>
 
@@ -30,7 +30,7 @@ Grimoire is the opposite: a disciplined pipeline that asks until **you** are cle
 /plugin install grimoire@grimoire
 ```
 
-That's it — `/grimoire-init`, `/grimoire-spec`, `/grimoire-plan`, `/grimoire-execute`, `/grimoire-quick`, and `/grimoire-update` are now available in every Claude Code session.
+That's it — `/grimoire-init`, `/grimoire-spec`, `/grimoire-plan`, `/grimoire-execute`, `/grimoire-quick`, `/grimoire-know`, and `/grimoire-update` are now available in every Claude Code session.
 
 To pull a newer version later, just run `/grimoire-update` — it handles the version check, changelog diff, and the two official commands for you.
 
@@ -58,6 +58,7 @@ The `grimoire@grimoire` form in the main install command is `plugin-name@marketp
 | `/grimoire-plan <NNN>` | Decompose `SPEC.md` into sequential step files; flips the page to `[planned]`. | [↓](#grimoire-plan) |
 | `/grimoire-execute <NNN>` | Run each step file in its own sub-agent under strict TDD; flips the page to `[finished]`. | [↓](#grimoire-execute) |
 | `/grimoire-quick <fix>` | Fast-path for trivial fixes. Refuses and redirects to `/grimoire-spec` if scope is too big. | [↓](#grimoire-quick) |
+| `/grimoire-know <question>` | Answer questions about the repository or its application — read-only, with web research and source citations when needed. | [↓](#grimoire-know) |
 | `/grimoire-update` | Check installed vs. latest version, show changelog, guide you through the official update commands. | [↓](#grimoire-update) |
 
 ## Skills in detail
@@ -98,6 +99,12 @@ Fast-path for trivial fixes (typos, one-line bug fixes, small tweaks). Two pause
 - **Plan authorization.** Even on small tasks, it prints an inline plan and waits for your explicit go-ahead before any code is written.
 
 Quick stays fully ephemeral — no page folder, no `HISTORIC.md` entry, no rotation. The fix lands as one or more atomic Conventional Commits and that is it.
+
+### /grimoire-know
+
+Read-only Q&A about the repository or the application it builds. You ask a question in free text (`/grimoire-know "how does the historic rotation work?"`); it spawns a sub-agent with codebase access (`Read`, `Grep`, `Glob`, read-only `Bash`) and web access (`WebSearch`, `WebFetch`) that inspects only the files needed and consults the web when the answer depends on facts outside the repo.
+
+The reply leads with the direct answer, explicitly flags anything the agent is not confident about, and ends with a `References` section listing every URL consulted when web research was used. Writes nothing, makes no commits, and never touches any `.grimoire/` state files — it is orthogonal to the Spec → Plan → Execute pipeline (same treatment as `grimoire-update`).
 
 ### /grimoire-update
 
@@ -155,7 +162,7 @@ Page numbers passed to `/grimoire-plan` and `/grimoire-execute` accept either ba
 
 ## Conventions
 
-The pipeline skills (`init`, `spec`, `plan`, `execute`, `quick`) share a single source of truth for the workflow rules — strict TDD, atomic Conventional Commits, sub-agent orchestration, the `.grimoire/pages/` layout, project context loading, and the `HISTORIC.md` recency log and status-of-record — in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). `grimoire-update` is plugin self-maintenance and does not participate in those rules.
+The pipeline skills (`init`, `spec`, `plan`, `execute`, `quick`) share a single source of truth for the workflow rules — strict TDD, atomic Conventional Commits, sub-agent orchestration, the `.grimoire/pages/` layout, project context loading, and the `HISTORIC.md` recency log and status-of-record — in [GRIMOIRE-CONVENTIONS.md](GRIMOIRE-CONVENTIONS.md). `grimoire-update` is plugin self-maintenance and `grimoire-know` is read-only Q&A, so neither participates in those rules.
 
 When a rule changes, it changes there once.
 
