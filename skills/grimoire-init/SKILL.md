@@ -38,6 +38,8 @@ Per `§ Pause-point pattern` (grimoire-init: clarifying questions), ask the user
 
 In **UPDATE** mode, ask only about deltas — what has changed since the existing `PROJECT.md` was written, and whether any section is now stale.
 
+In **UPDATE** mode, when `## Key Conventions / Constraints` and/or `## Notes` in the existing `PROJECT.md` already contain one or more entries, list those entries back to the user briefly (slug or first ~10 words per bullet) and ask "Anything stale here?". Default action is **preserve in place** — only remove or rewrite a specific entry when the user gives an explicit delta. Silence means keep everything. The user may still add new entries via this Phase 2 interview, exactly as before. Per `§ Project context`'s dual-writer contract, these two sections are also owned by `grimoire-note`, so init's default is preserve-in-place. The full-rewrite/refresh behavior of update mode is unchanged for `## Purpose`, `## Audience`, `## Tech Stack`, `## Repository Layout`, and `## Current Status` — only these two sections get preserve-by-default protection.
+
 Wait for the user's answers before drafting `PROJECT.md`.
 
 **[Phase 3: Draft Review]**
